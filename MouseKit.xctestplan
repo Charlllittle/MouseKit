@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "4D2A3BE5-4D45-4F68-88CE-86BE1621B6D8",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:MouseKit.xcodeproj",
+      "identifier" : "6000000000000001",
+      "name" : "MouseKit"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:MouseKit.xcodeproj",
+        "identifier" : "56001A2C2F36A8140054EB1B",
+        "name" : "MouseKitTests"
+      }
+    }
+  ],
+  "version" : 1
+}

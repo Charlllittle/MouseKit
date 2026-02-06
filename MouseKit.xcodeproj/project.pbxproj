@@ -12,7 +12,19 @@
 		5695F11F2F367F1200737EE3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5695F11E2F367F1200737EE3 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		56001A312F36A8140054EB1B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6000000000000001;
+			remoteInfo = MouseKit;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		56001A2D2F36A8140054EB1B /* MouseKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MouseKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		56001A3E2F36ACD50054EB1B /* MouseKit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = MouseKit.xctestplan; sourceTree = "<group>"; };
 		5695F0D82F3676B000737EE3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5695F0D92F3676B000737EE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5695F0DA2F3676B000737EE3 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -83,6 +95,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		56001A2E2F36A8140054EB1B /* MouseKitTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MouseKitTests; sourceTree = "<group>"; };
 		5695F0D72F3676B000737EE3 /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5695F1002F36780600737EE3 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 		5695F0E02F3676B000737EE3 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5695F1052F36780A00737EE3 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
 		5695F0EB2F3676B000737EE3 /* Services */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5695F1162F36781000737EE3 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Services; sourceTree = "<group>"; };
@@ -99,12 +112,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		56001A2A2F36A8140054EB1B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		5000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				56001A3E2F36ACD50054EB1B /* MouseKit.xctestplan */,
 				5695F11E2F367F1200737EE3 /* Localizable.xcstrings */,
 				5695F0D72F3676B000737EE3 /* App */,
 				5695F0D82F3676B000737EE3 /* Assets.xcassets */,
@@ -118,12 +139,37 @@
 				5695F0F12F3676B000737EE3 /* ViewModels */,
 				5695F0FB2F3676B000737EE3 /* Views */,
 				5695F0FE2F36774600737EE3 /* MouseKit.app */,
+				56001A2D2F36A8140054EB1B /* MouseKitTests.xctest */,
+				56001A2E2F36A8140054EB1B /* MouseKitTests */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		56001A2C2F36A8140054EB1B /* MouseKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56001A352F36A8140054EB1B /* Build configuration list for PBXNativeTarget "MouseKitTests" */;
+			buildPhases = (
+				56001A292F36A8140054EB1B /* Sources */,
+				56001A2A2F36A8140054EB1B /* Frameworks */,
+				56001A2B2F36A8140054EB1B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				56001A322F36A8140054EB1B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				56001A2E2F36A8140054EB1B /* MouseKitTests */,
+			);
+			name = MouseKitTests;
+			packageProductDependencies = (
+			);
+			productName = MouseKitTests;
+			productReference = 56001A2D2F36A8140054EB1B /* MouseKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		6000000000000001 /* MouseKit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7000000000000001 /* Build configuration list for PBXNativeTarget "MouseKit" */;
@@ -148,9 +194,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					56001A2C2F36A8140054EB1B = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 6000000000000001;
+					};
 					6000000000000001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
@@ -170,11 +220,19 @@
 			projectRoot = "";
 			targets = (
 				6000000000000001 /* MouseKit */,
+				56001A2C2F36A8140054EB1B /* MouseKitTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		56001A2B2F36A8140054EB1B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9000000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -188,6 +246,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		56001A292F36A8140054EB1B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -197,7 +262,59 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		56001A322F36A8140054EB1B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6000000000000001 /* MouseKit */;
+			targetProxy = 56001A312F36A8140054EB1B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		56001A332F36A8140054EB1B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GK97F9XRJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Charlie.MouseKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MouseKit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MouseKit";
+			};
+			name = Debug;
+		};
+		56001A342F36A8140054EB1B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GK97F9XRJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Charlie.MouseKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MouseKit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MouseKit";
+			};
+			name = Release;
+		};
 		C000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -388,6 +505,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		56001A352F36A8140054EB1B /* Build configuration list for PBXNativeTarget "MouseKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56001A332F36A8140054EB1B /* Debug */,
+				56001A342F36A8140054EB1B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7000000000000001 /* Build configuration list for PBXNativeTarget "MouseKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
