@@ -51,6 +51,21 @@ struct TouchpadView: View {
                         viewModel.sendCommand(.mouseUp)
                     }
                 },
+                onDoubleTapAndHoldStart: {
+                    gestureProcessor.handleDoubleTapAndHoldStart {
+                        viewModel.sendCommand(.mouseDown)
+                    }
+                },
+                onDoubleTapAndHoldDrag: { delta in
+                    gestureProcessor.handleDoubleTapAndHoldDrag(translation: delta) { dx, dy in
+                        viewModel.sendCommand(.mouseMove(dx: dx, dy: dy))
+                    }
+                },
+                onDoubleTapAndHoldEnd: {
+                    gestureProcessor.handleDoubleTapAndHoldEnd {
+                        viewModel.sendCommand(.mouseUp)
+                    }
+                },
                 onPinchStart: handlePinchStart,
                 onPinchChange: handlePinchChange,
                 onPinchEnd: handlePinchEnd
@@ -130,6 +145,9 @@ struct AllGesturesView: UIViewRepresentable {
     var onLongPressStart: () -> Void
     var onLongPressDrag: (CGSize) -> Void
     var onLongPressEnd: () -> Void
+    var onDoubleTapAndHoldStart: () -> Void
+    var onDoubleTapAndHoldDrag: (CGSize) -> Void
+    var onDoubleTapAndHoldEnd: () -> Void
     var onPinchStart: () -> Void
     var onPinchChange: (CGFloat) -> Void
     var onPinchEnd: () -> Void
@@ -147,6 +165,13 @@ struct AllGesturesView: UIViewRepresentable {
         singleTap.delaysTouchesBegan = false
         singleTap.delaysTouchesEnded = false
         view.addGestureRecognizer(singleTap)
+
+        // Double tap (for double tap and hold)
+        let doubleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleDoubleTap))
+        doubleTap.numberOfTouchesRequired = 1
+        doubleTap.numberOfTapsRequired = 2
+        doubleTap.delegate = context.coordinator
+        view.addGestureRecognizer(doubleTap)
 
         // Two-finger tap
         let twoFingerTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTwoFingerTap))
@@ -181,6 +206,7 @@ struct AllGesturesView: UIViewRepresentable {
 
         // Configure gesture relationships
         singleTap.require(toFail: twoFingerTap)
+        singleTap.require(toFail: doubleTap)
         // REMOVED: singlePan.require(toFail: twoFingerPan) - This was causing the delay!
         // We'll check touch count in the gesture handler instead
 
@@ -188,6 +214,7 @@ struct AllGesturesView: UIViewRepresentable {
         context.coordinator.singlePan = singlePan
         context.coordinator.longPress = longPress
         context.coordinator.singleTap = singleTap
+        context.coordinator.doubleTap = doubleTap
         context.coordinator.twoFingerPan = twoFingerPan
 
         return view
@@ -208,6 +235,9 @@ struct AllGesturesView: UIViewRepresentable {
             onLongPressStart: onLongPressStart,
             onLongPressDrag: onLongPressDrag,
             onLongPressEnd: onLongPressEnd,
+            onDoubleTapAndHoldStart: onDoubleTapAndHoldStart,
+            onDoubleTapAndHoldDrag: onDoubleTapAndHoldDrag,
+            onDoubleTapAndHoldEnd: onDoubleTapAndHoldEnd,
             onPinchStart: onPinchStart,
             onPinchChange: onPinchChange,
             onPinchEnd: onPinchEnd
@@ -226,19 +256,27 @@ struct AllGesturesView: UIViewRepresentable {
         var onLongPressStart: () -> Void
         var onLongPressDrag: (CGSize) -> Void
         var onLongPressEnd: () -> Void
+        var onDoubleTapAndHoldStart: () -> Void
+        var onDoubleTapAndHoldDrag: (CGSize) -> Void
+        var onDoubleTapAndHoldEnd: () -> Void
         var onPinchStart: () -> Void
         var onPinchChange: (CGFloat) -> Void
         var onPinchEnd: () -> Void
 
         var isLongPressing = false
         var isPanning = false
+        var isDoubleTapAndHold = false
+        var doubleTapTimer: Timer?
         var longPressStartLocation: CGPoint = .zero
         var longPressLastLocation: CGPoint = .zero
+        var doubleTapStartLocation: CGPoint = .zero
+        var doubleTapLastLocation: CGPoint = .zero
 
         // Store gesture references
         weak var singlePan: UIPanGestureRecognizer?
         weak var longPress: UILongPressGestureRecognizer?
         weak var singleTap: UITapGestureRecognizer?
+        weak var doubleTap: UITapGestureRecognizer?
         weak var twoFingerPan: UIPanGestureRecognizer?
 
         init(
@@ -253,6 +291,9 @@ struct AllGesturesView: UIViewRepresentable {
             onLongPressStart: @escaping () -> Void,
             onLongPressDrag: @escaping (CGSize) -> Void,
             onLongPressEnd: @escaping () -> Void,
+            onDoubleTapAndHoldStart: @escaping () -> Void,
+            onDoubleTapAndHoldDrag: @escaping (CGSize) -> Void,
+            onDoubleTapAndHoldEnd: @escaping () -> Void,
             onPinchStart: @escaping () -> Void,
             onPinchChange: @escaping (CGFloat) -> Void,
             onPinchEnd: @escaping () -> Void
@@ -268,6 +309,9 @@ struct AllGesturesView: UIViewRepresentable {
             self.onLongPressStart = onLongPressStart
             self.onLongPressDrag = onLongPressDrag
             self.onLongPressEnd = onLongPressEnd
+            self.onDoubleTapAndHoldStart = onDoubleTapAndHoldStart
+            self.onDoubleTapAndHoldDrag = onDoubleTapAndHoldDrag
+            self.onDoubleTapAndHoldEnd = onDoubleTapAndHoldEnd
             self.onPinchStart = onPinchStart
             self.onPinchChange = onPinchChange
             self.onPinchEnd = onPinchEnd
@@ -285,6 +329,27 @@ struct AllGesturesView: UIViewRepresentable {
             }
         }
 
+        @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
+            if gesture.state == .ended {
+                // Start double tap and hold - wait for finger to move
+                isDoubleTapAndHold = true
+                doubleTapStartLocation = gesture.location(in: gesture.view)
+                doubleTapLastLocation = doubleTapStartLocation
+
+                // Cancel the timer if it fires without movement
+                doubleTapTimer?.invalidate()
+                doubleTapTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { [weak self] _ in
+                    // If no pan has started after double tap, treat it as two separate clicks
+                    if self?.isDoubleTapAndHold == true {
+                        self?.isDoubleTapAndHold = false
+                        // Execute two clicks
+                        self?.onSingleTap()
+                        self?.onSingleTap()
+                    }
+                }
+            }
+        }
+
         @objc func handleSinglePan(_ gesture: UIPanGestureRecognizer) {
             // Check number of touches - if 2, ignore (let two-finger pan handle it)
             let touchCount = gesture.numberOfTouches
@@ -298,6 +363,32 @@ struct AllGesturesView: UIViewRepresentable {
             // Don't handle pan if we're in a long press
             if isLongPressing {
                 print("DEBUG handleSinglePan: Ignoring - long press active")
+                return
+            }
+
+            // Handle double tap and hold
+            if isDoubleTapAndHold {
+                switch gesture.state {
+                case .began, .changed:
+                    if gesture.state == .began {
+                        doubleTapTimer?.invalidate()
+                        onDoubleTapAndHoldStart()
+                    }
+                    let currentLocation = gesture.location(in: gesture.view)
+                    let delta = CGSize(
+                        width: currentLocation.x - doubleTapLastLocation.x,
+                        height: currentLocation.y - doubleTapLastLocation.y
+                    )
+                    onDoubleTapAndHoldDrag(delta)
+                    doubleTapLastLocation = currentLocation
+
+                case .ended, .cancelled:
+                    isDoubleTapAndHold = false
+                    onDoubleTapAndHoldEnd()
+
+                default:
+                    break
+                }
                 return
             }
 

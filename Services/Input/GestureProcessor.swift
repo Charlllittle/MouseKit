@@ -17,6 +17,7 @@ class GestureProcessor: ObservableObject {
         case scrolling
         case zooming
         case dragAndDrop
+        case doubleTapAndHold
     }
 
     @Published private(set) var state: GestureState = .idle
@@ -202,5 +203,38 @@ class GestureProcessor: ObservableObject {
 
     func handleZoomEnd() {
         state = .idle
+    }
+
+    // MARK: - Double Tap and Hold (Selection Drag)
+
+    func handleDoubleTapAndHoldStart(completion: @escaping () -> Void) {
+        state = .doubleTapAndHold
+        completion() // Send mouse down
+    }
+
+    func handleDoubleTapAndHoldDrag(translation: CGSize, completion: @escaping (Int8, Int8) -> Void) {
+        guard state == .doubleTapAndHold else { return }
+
+        // Throttle updates
+        if let lastUpdate = lastUpdateTime,
+           Date().timeIntervalSince(lastUpdate) < throttleInterval {
+            return
+        }
+
+        // Apply acceleration curve and invert axes
+        let acceleratedX = applyAcceleration(-translation.width)
+        let acceleratedY = applyAcceleration(-translation.height)
+
+        let dx = ProtocolEncoder.deltaToInt8(acceleratedX)
+        let dy = ProtocolEncoder.deltaToInt8(acceleratedY)
+
+        completion(dx, dy)
+        lastUpdateTime = Date()
+    }
+
+    func handleDoubleTapAndHoldEnd(completion: @escaping () -> Void) {
+        completion() // Send mouse up
+        state = .idle
+        lastUpdateTime = nil
     }
 }
