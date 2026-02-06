@@ -46,6 +46,11 @@ struct MainView: View {
             } message: {
                 Text(viewModel.errorMessage)
             }
+            .overlay {
+                if case .connecting = connectionManager.connectionState {
+                    ConnectingIndicatorView()
+                }
+            }
             .onChange(of: connectionManager.connectionState) { _, newState in
                 if case .connected = newState {
                     showingInputView = true
@@ -54,6 +59,33 @@ struct MainView: View {
                     viewModel.showingConnectionError = true
                 }
             }
+        }
+    }
+}
+
+// MARK: - Connecting Indicator View
+
+struct ConnectingIndicatorView: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .scaleEffect(1.5)
+
+                Text("Connecting...")
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
+            .padding(32)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(UIColor.systemBackground))
+                    .shadow(radius: 10)
+            )
         }
     }
 }
