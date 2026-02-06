@@ -33,7 +33,7 @@ enum TCPConnectionError: Error, LocalizedError {
 
 actor TCPConnection {
     private var connection: NWConnection?
-    private var stateUpdateHandler: ((NWConnection.State) -> Void)?
+    private var stateUpdateHandler: (@Sendable (NWConnection.State) -> Void)?
 
     let host: String
     let port: UInt16
@@ -43,7 +43,7 @@ actor TCPConnection {
         self.port = port
     }
 
-    func connect(stateUpdateHandler: @escaping (NWConnection.State) -> Void) async throws {
+    func connect(stateUpdateHandler: @escaping @Sendable (NWConnection.State) -> Void) async throws {
         self.stateUpdateHandler = stateUpdateHandler
 
         let endpoint = NWEndpoint.hostPort(

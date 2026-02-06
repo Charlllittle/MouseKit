@@ -24,7 +24,7 @@
 
 /* Begin PBXFileReference section */
 		56001A2D2F36A8140054EB1B /* MouseKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MouseKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		56001A3E2F36ACD50054EB1B /* MouseKit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = MouseKit.xctestplan; sourceTree = "<group>"; };
+		56001A3E2F36ACD50054EB1B /* MouseKit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = MouseKit.xctestplan; sourceTree = "<group>"; };
 		5695F0D82F3676B000737EE3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5695F0D92F3676B000737EE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5695F0DA2F3676B000737EE3 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -465,7 +465,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mousekit.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -497,7 +497,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mousekit.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
