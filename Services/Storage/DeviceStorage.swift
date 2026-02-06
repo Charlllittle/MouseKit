@@ -10,9 +10,10 @@ import Foundation
 class DeviceStorage: ObservableObject {
     @Published private(set) var devices: [SavedDevice] = []
 
-    private let userDefaults = UserDefaults.standard
+    private let userDefaults: UserDefaults
 
-    init() {
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
         loadDevices()
     }
 
