@@ -1,3 +1,10 @@
+//
+//  DeviceInfo.swift
+//  MouseKit
+//
+//  Created by Charles Little on 06/02/2026.
+//
+
 import UIKit
 
 enum DeviceInfo {

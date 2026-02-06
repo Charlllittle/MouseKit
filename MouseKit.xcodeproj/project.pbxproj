@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5695F11A2F36785500737EE3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5695F0D82F3676B000737EE3 /* Assets.xcassets */; };
 		5695F11B2F36785500737EE3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5695F0DA2F3676B000737EE3 /* LaunchScreen.storyboard */; };
+		5695F11F2F367F1200737EE3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5695F11E2F367F1200737EE3 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		5695F0DB2F3676B000737EE3 /* LICENSE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
 		5695F0E22F3676B000737EE3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5695F0FE2F36774600737EE3 /* MouseKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MouseKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5695F11E2F367F1200737EE3 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -103,6 +105,7 @@
 		5000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				5695F11E2F367F1200737EE3 /* Localizable.xcstrings */,
 				5695F0D72F3676B000737EE3 /* App */,
 				5695F0D82F3676B000737EE3 /* Assets.xcassets */,
 				5695F0D92F3676B000737EE3 /* Info.plist */,
@@ -178,6 +181,7 @@
 			files = (
 				5695F11A2F36785500737EE3 /* Assets.xcassets in Resources */,
 				5695F11B2F36785500737EE3 /* LaunchScreen.storyboard in Resources */,
+				5695F11F2F367F1200737EE3 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +258,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -311,6 +316,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
