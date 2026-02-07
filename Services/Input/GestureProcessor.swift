@@ -8,8 +8,11 @@
 import Foundation
 import SwiftUI
 
+/// Processes and interprets touch gestures for mouse and keyboard input
+/// Handles gesture recognition, acceleration curves, and gesture state management
 @MainActor
 class GestureProcessor: ObservableObject {
+  /// Represents the current gesture state
   enum GestureState {
     case idle
     case possibleTap
@@ -19,16 +22,27 @@ class GestureProcessor: ObservableObject {
     case dragAndDrop
   }
 
+  /// The current gesture state
   @Published private(set) var state: GestureState = .idle
 
+  /// Last time a gesture was updated, used for throttling
   private var lastUpdateTime: Date?
+  /// Pending single tap action, held until double-tap timeout expires
   private var pendingSingleTap: (() -> Void)?
+  /// Timer for double-tap detection
   private var doubleTapTimer: Timer?
 
+  /// Minimum interval between gesture updates for performance optimization
   private let throttleInterval = Constants.gestureThrottleInterval
 
   // MARK: - Tap Gestures
 
+  /**
+   Handles a single tap gesture with double-tap detection.
+   If a second tap occurs within the timeout, triggers a double-tap instead.
+
+   - Parameter completion: Closure to execute for each tap (called once for single tap, twice for double-tap)
+   */
   func handleSingleTap(completion: @escaping () -> Void) {
     // Check if we're waiting for a possible double-tap
     if pendingSingleTap != nil {
@@ -46,7 +60,7 @@ class GestureProcessor: ObservableObject {
       doubleTapTimer = Timer.scheduledTimer(
         withTimeInterval: Constants.doubleTapDelay, repeats: false
       ) { [weak self] _ in
-        guard let self = self else { return }
+        guard let self else { return }
 
         // Execute on main actor since we're accessing main-actor isolated properties
         Task { @MainActor in
@@ -58,6 +72,12 @@ class GestureProcessor: ObservableObject {
     }
   }
 
+  /**
+   Handles a two-finger tap gesture (right-click equivalent).
+   Executes immediately without double-tap detection.
+
+   - Parameter completion: Closure to execute for the right-click action
+   */
   func handleTwoFingerTap(completion: @escaping () -> Void) {
     // Two-finger tap is always a right-click, no delay needed
     completion()
@@ -65,12 +85,20 @@ class GestureProcessor: ObservableObject {
 
   // MARK: - Drag Gestures
 
+  /// Begins a drag gesture (mouse cursor movement)
   func handleDragStart() {
     state = .dragging
     lastUpdateTime = Date()
     print("DEBUG GestureProcessor: handleDragStart - state now: \(state)")
   }
 
+  /**
+   Processes drag movement with acceleration and throttling.
+
+   - Parameters:
+     - translation: The movement delta since last update
+     - completion: Closure receiving the processed dx and dy movement values
+   */
   func handleDragChange(translation: CGSize, completion: @escaping (Int8, Int8) -> Void) {
     print(
       "DEBUG GestureProcessor: handleDragChange called - state: \(state), translation: \(translation)"
@@ -103,8 +131,13 @@ class GestureProcessor: ObservableObject {
     lastUpdateTime = Date()
   }
 
-  /// Applies velocity-based acceleration to mouse movement
-  /// Small movements: ~1.5x, Medium: ~2-3x, Large: ~4x
+  /**
+   Applies velocity-based acceleration to mouse movement using a power curve.
+   Small movements: ~1.5x, Medium: ~2-3x, Large: ~4x
+
+   - Parameter value: The raw movement value
+   - Returns: The accelerated movement value
+   */
   private func applyAcceleration(_ value: CGFloat) -> CGFloat {
     let absValue = abs(value)
     let sign = value < 0 ? -1.0 : 1.0
@@ -118,6 +151,7 @@ class GestureProcessor: ObservableObject {
     return sign * acceleratedValue
   }
 
+  /// Ends a drag gesture and resets state
   func handleDragEnd() {
     state = .idle
     lastUpdateTime = nil
@@ -126,11 +160,19 @@ class GestureProcessor: ObservableObject {
 
   // MARK: - Scroll Gestures
 
+  /// Begins a scroll gesture (two-finger pan)
   func handleScrollStart() {
     state = .scrolling
     lastUpdateTime = Date()
   }
 
+  /**
+   Processes scroll movement, determining the dominant scroll direction.
+
+   - Parameters:
+     - translation: The movement delta since last update
+     - completion: Closure receiving optional vertical and horizontal scroll deltas
+   */
   func handleScrollChange(translation: CGSize, completion: @escaping (Int8?, Int8?) -> Void) {
     guard state == .scrolling else { return }
 
@@ -160,6 +202,7 @@ class GestureProcessor: ObservableObject {
     lastUpdateTime = Date()
   }
 
+  /// Ends a scroll gesture and resets state
   func handleScrollEnd() {
     state = .idle
     lastUpdateTime = nil
@@ -167,11 +210,24 @@ class GestureProcessor: ObservableObject {
 
   // MARK: - Long Press + Drag (Drag & Drop)
 
+  /**
+   Begins a long press gesture (drag and drop).
+   Sends an immediate mouse down event.
+
+   - Parameter completion: Closure to execute for the mouse down action
+   */
   func handleLongPressStart(completion: @escaping () -> Void) {
     state = .dragAndDrop
     completion()  // Send mouse down
   }
 
+  /**
+   Processes long press drag movement with acceleration.
+
+   - Parameters:
+     - translation: The movement delta since last update
+     - completion: Closure receiving the processed dx and dy movement values
+   */
   func handleLongPressDrag(translation: CGSize, completion: @escaping (Int8, Int8) -> Void) {
     guard state == .dragAndDrop else { return }
 
@@ -193,6 +249,11 @@ class GestureProcessor: ObservableObject {
     lastUpdateTime = Date()
   }
 
+  /**
+   Ends a long press gesture and sends mouse up event.
+
+   - Parameter completion: Closure to execute for the mouse up action
+   */
   func handleLongPressEnd(completion: @escaping () -> Void) {
     completion()  // Send mouse up
     state = .idle
@@ -201,10 +262,18 @@ class GestureProcessor: ObservableObject {
 
   // MARK: - Zoom Gestures
 
+  /// Begins a zoom gesture (pinch)
   func handleZoomStart() {
     state = .zooming
   }
 
+  /**
+   Processes zoom gesture changes.
+
+   - Parameters:
+     - scale: The pinch gesture scale value
+     - completion: Closure receiving the encoded zoom value (0-255)
+   */
   func handleZoomChange(scale: CGFloat, completion: @escaping (UInt8) -> Void) {
     guard state == .zooming else { return }
 
@@ -212,6 +281,7 @@ class GestureProcessor: ObservableObject {
     completion(zoomValue)
   }
 
+  /// Ends a zoom gesture and resets state
   func handleZoomEnd() {
     state = .idle
   }

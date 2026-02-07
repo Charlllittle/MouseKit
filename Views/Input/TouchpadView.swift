@@ -13,7 +13,7 @@ struct TouchpadView: View {
   @StateObject private var gestureProcessor = GestureProcessor()
 
   var body: some View {
-    GeometryReader { geometry in
+    GeometryReader { _ in
       AllGesturesView(
         onSingleTap: handleSingleTap,
         onTwoFingerTap: handleTwoFingerTap,

@@ -7,15 +7,26 @@
 
 import Foundation
 
+/// Encodes input commands and handshake data into binary protocol format
 struct ProtocolEncoder {
-  /// Encodes the handshake message
+  /**
+   Encodes the handshake message for initial connection.
+
+   - Returns: UTF-8 encoded handshake data
+   */
   @MainActor
   static func encodeHandshake() -> Data {
     let handshake = DeviceInfo.handshakeString()
     return Data(handshake.utf8)
   }
 
-  /// Encodes an input command to binary data
+  /**
+   Encodes an input command into binary protocol format.
+   Each command consists of a command code followed by command-specific data.
+
+   - Parameter command: The input command to encode
+   - Returns: Binary data ready to be sent over the network
+   */
   static func encode(_ command: InputCommand) -> Data {
     var data = Data()
     data.append(command.commandCode)
@@ -48,18 +59,35 @@ struct ProtocolEncoder {
     return data
   }
 
-  /// Clamps an Int8 value to valid range
+  /**
+   Clamps an Int8 value to valid range (-128 to 127).
+
+   - Parameter value: The value to clamp
+   - Returns: The clamped value
+   */
   private static func clamp(_ value: Int8) -> Int8 {
     return max(-128, min(127, value))
   }
 
-  /// Converts a CGFloat delta to clamped Int8
+  /**
+   Converts a CGFloat delta to a clamped Int8 value.
+   Used for mouse movement and scroll deltas.
+
+   - Parameter value: The floating-point delta value
+   - Returns: An Int8 value clamped to -128...127
+   */
   static func deltaToInt8(_ value: CGFloat) -> Int8 {
     let clamped = max(-128.0, min(127.0, value))
     return Int8(clamped)
   }
 
-  /// Converts a CGFloat scale to UInt8 (0-255)
+  /**
+   Converts a CGFloat scale to UInt8 (0-255).
+   Used for zoom/pinch gestures.
+
+   - Parameter scale: The scale value (typically 0-2.55)
+   - Returns: A UInt8 value from 0 to 255
+   */
   static func scaleToUInt8(_ scale: CGFloat) -> UInt8 {
     let normalized = max(0.0, min(255.0, scale * 100.0))
     return UInt8(normalized)
