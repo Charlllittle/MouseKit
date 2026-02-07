@@ -44,7 +44,7 @@ class GestureProcessor: ObservableObject {
             pendingSingleTap = completion
 
             doubleTapTimer = Timer.scheduledTimer(withTimeInterval: Constants.doubleTapDelay, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
 
                 // No second tap detected, execute single tap
                 self.pendingSingleTap?()
