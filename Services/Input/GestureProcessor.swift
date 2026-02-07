@@ -10,200 +10,209 @@ import SwiftUI
 
 @MainActor
 class GestureProcessor: ObservableObject {
-    enum GestureState {
-        case idle
-        case possibleTap
-        case dragging
-        case scrolling
-        case zooming
-        case dragAndDrop
-    }
+  enum GestureState {
+    case idle
+    case possibleTap
+    case dragging
+    case scrolling
+    case zooming
+    case dragAndDrop
+  }
 
-    @Published private(set) var state: GestureState = .idle
+  @Published private(set) var state: GestureState = .idle
 
-    private var lastUpdateTime: Date?
-    private var pendingSingleTap: (() -> Void)?
-    private var doubleTapTimer: Timer?
+  private var lastUpdateTime: Date?
+  private var pendingSingleTap: (() -> Void)?
+  private var doubleTapTimer: Timer?
 
-    private let throttleInterval = Constants.gestureThrottleInterval
+  private let throttleInterval = Constants.gestureThrottleInterval
 
-    // MARK: - Tap Gestures
+  // MARK: - Tap Gestures
 
-    func handleSingleTap(completion: @escaping () -> Void) {
-        // Check if we're waiting for a possible double-tap
-        if pendingSingleTap != nil {
-            // This is a double-tap, cancel pending single tap
-            doubleTapTimer?.invalidate()
-            pendingSingleTap = nil
+  func handleSingleTap(completion: @escaping () -> Void) {
+    // Check if we're waiting for a possible double-tap
+    if pendingSingleTap != nil {
+      // This is a double-tap, cancel pending single tap
+      doubleTapTimer?.invalidate()
+      pendingSingleTap = nil
 
-            // Execute double-tap (two left clicks)
-            completion()
-            completion()
-        } else {
-            // Wait to see if this becomes a double-tap
-            pendingSingleTap = completion
+      // Execute double-tap (two left clicks)
+      completion()
+      completion()
+    } else {
+      // Wait to see if this becomes a double-tap
+      pendingSingleTap = completion
 
-            doubleTapTimer = Timer.scheduledTimer(withTimeInterval: Constants.doubleTapDelay, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
+      doubleTapTimer = Timer.scheduledTimer(
+        withTimeInterval: Constants.doubleTapDelay, repeats: false
+      ) { [weak self] _ in
+        guard let self = self else { return }
 
-                // Execute on main actor since we're accessing main-actor isolated properties
-                Task { @MainActor in
-                    // No second tap detected, execute single tap
-                    self.pendingSingleTap?()
-                    self.pendingSingleTap = nil
-                }
-            }
+        // Execute on main actor since we're accessing main-actor isolated properties
+        Task { @MainActor in
+          // No second tap detected, execute single tap
+          self.pendingSingleTap?()
+          self.pendingSingleTap = nil
         }
+      }
+    }
+  }
+
+  func handleTwoFingerTap(completion: @escaping () -> Void) {
+    // Two-finger tap is always a right-click, no delay needed
+    completion()
+  }
+
+  // MARK: - Drag Gestures
+
+  func handleDragStart() {
+    state = .dragging
+    lastUpdateTime = Date()
+    print("DEBUG GestureProcessor: handleDragStart - state now: \(state)")
+  }
+
+  func handleDragChange(translation: CGSize, completion: @escaping (Int8, Int8) -> Void) {
+    print(
+      "DEBUG GestureProcessor: handleDragChange called - state: \(state), translation: \(translation)"
+    )
+
+    guard state == .dragging else {
+      print("DEBUG GestureProcessor: REJECTED - state is not dragging")
+      return
     }
 
-    func handleTwoFingerTap(completion: @escaping () -> Void) {
-        // Two-finger tap is always a right-click, no delay needed
-        completion()
+    // Throttle updates
+    if let lastUpdate = lastUpdateTime,
+      Date().timeIntervalSince(lastUpdate) < throttleInterval
+    {
+      print("DEBUG GestureProcessor: THROTTLED")
+      return
     }
 
-    // MARK: - Drag Gestures
+    // Apply acceleration curve and invert axes
+    let acceleratedX = applyAcceleration(-translation.width)
+    let acceleratedY = applyAcceleration(-translation.height)
 
-    func handleDragStart() {
-        state = .dragging
-        lastUpdateTime = Date()
-        print("DEBUG GestureProcessor: handleDragStart - state now: \(state)")
+    let dx = ProtocolEncoder.deltaToInt8(acceleratedX)
+    let dy = ProtocolEncoder.deltaToInt8(acceleratedY)
+
+    print(
+      "DEBUG GestureProcessor: Calling completion with dx: \(dx), dy: \(dy) (accelerated from \(translation))"
+    )
+    completion(dx, dy)
+    lastUpdateTime = Date()
+  }
+
+  /// Applies velocity-based acceleration to mouse movement
+  /// Small movements: ~1.5x, Medium: ~2-3x, Large: ~4x
+  private func applyAcceleration(_ value: CGFloat) -> CGFloat {
+    let absValue = abs(value)
+    let sign = value < 0 ? -1.0 : 1.0
+
+    // Acceleration curve: starts at 1.5x, increases with speed
+    // Uses a power curve for smooth acceleration
+    let baseMultiplier: CGFloat = 1.5
+    let speedFactor: CGFloat = 0.05
+    let acceleratedValue = absValue * (baseMultiplier + pow(absValue * speedFactor, 1.2))
+
+    return sign * acceleratedValue
+  }
+
+  func handleDragEnd() {
+    state = .idle
+    lastUpdateTime = nil
+    print("DEBUG GestureProcessor: handleDragEnd - state now: \(state)")
+  }
+
+  // MARK: - Scroll Gestures
+
+  func handleScrollStart() {
+    state = .scrolling
+    lastUpdateTime = Date()
+  }
+
+  func handleScrollChange(translation: CGSize, completion: @escaping (Int8?, Int8?) -> Void) {
+    guard state == .scrolling else { return }
+
+    // Throttle updates
+    if let lastUpdate = lastUpdateTime,
+      Date().timeIntervalSince(lastUpdate) < throttleInterval
+    {
+      return
     }
 
-    func handleDragChange(translation: CGSize, completion: @escaping (Int8, Int8) -> Void) {
-        print("DEBUG GestureProcessor: handleDragChange called - state: \(state), translation: \(translation)")
+    // Determine primary scroll direction
+    let absX = abs(translation.width)
+    let absY = abs(translation.height)
 
-        guard state == .dragging else {
-            print("DEBUG GestureProcessor: REJECTED - state is not dragging")
-            return
-        }
+    var verticalDelta: Int8?
+    var horizontalDelta: Int8?
 
-        // Throttle updates
-        if let lastUpdate = lastUpdateTime,
-           Date().timeIntervalSince(lastUpdate) < throttleInterval {
-            print("DEBUG GestureProcessor: THROTTLED")
-            return
-        }
-
-        // Apply acceleration curve and invert axes
-        let acceleratedX = applyAcceleration(-translation.width)
-        let acceleratedY = applyAcceleration(-translation.height)
-
-        let dx = ProtocolEncoder.deltaToInt8(acceleratedX)
-        let dy = ProtocolEncoder.deltaToInt8(acceleratedY)
-
-        print("DEBUG GestureProcessor: Calling completion with dx: \(dx), dy: \(dy) (accelerated from \(translation))")
-        completion(dx, dy)
-        lastUpdateTime = Date()
+    if absY > absX {
+      // Vertical scroll is dominant
+      verticalDelta = ProtocolEncoder.deltaToInt8(-translation.height)
+    } else {
+      // Horizontal scroll is dominant
+      horizontalDelta = ProtocolEncoder.deltaToInt8(translation.width)
     }
 
-    /// Applies velocity-based acceleration to mouse movement
-    /// Small movements: ~1.5x, Medium: ~2-3x, Large: ~4x
-    private func applyAcceleration(_ value: CGFloat) -> CGFloat {
-        let absValue = abs(value)
-        let sign = value < 0 ? -1.0 : 1.0
+    completion(verticalDelta, horizontalDelta)
+    lastUpdateTime = Date()
+  }
 
-        // Acceleration curve: starts at 1.5x, increases with speed
-        // Uses a power curve for smooth acceleration
-        let baseMultiplier: CGFloat = 1.5
-        let speedFactor: CGFloat = 0.05
-        let acceleratedValue = absValue * (baseMultiplier + pow(absValue * speedFactor, 1.2))
+  func handleScrollEnd() {
+    state = .idle
+    lastUpdateTime = nil
+  }
 
-        return sign * acceleratedValue
+  // MARK: - Long Press + Drag (Drag & Drop)
+
+  func handleLongPressStart(completion: @escaping () -> Void) {
+    state = .dragAndDrop
+    completion()  // Send mouse down
+  }
+
+  func handleLongPressDrag(translation: CGSize, completion: @escaping (Int8, Int8) -> Void) {
+    guard state == .dragAndDrop else { return }
+
+    // Throttle updates
+    if let lastUpdate = lastUpdateTime,
+      Date().timeIntervalSince(lastUpdate) < throttleInterval
+    {
+      return
     }
 
-    func handleDragEnd() {
-        state = .idle
-        lastUpdateTime = nil
-        print("DEBUG GestureProcessor: handleDragEnd - state now: \(state)")
-    }
+    // Apply acceleration curve and invert axes
+    let acceleratedX = applyAcceleration(-translation.width)
+    let acceleratedY = applyAcceleration(-translation.height)
 
-    // MARK: - Scroll Gestures
+    let dx = ProtocolEncoder.deltaToInt8(acceleratedX)
+    let dy = ProtocolEncoder.deltaToInt8(acceleratedY)
 
-    func handleScrollStart() {
-        state = .scrolling
-        lastUpdateTime = Date()
-    }
+    completion(dx, dy)
+    lastUpdateTime = Date()
+  }
 
-    func handleScrollChange(translation: CGSize, completion: @escaping (Int8?, Int8?) -> Void) {
-        guard state == .scrolling else { return }
+  func handleLongPressEnd(completion: @escaping () -> Void) {
+    completion()  // Send mouse up
+    state = .idle
+    lastUpdateTime = nil
+  }
 
-        // Throttle updates
-        if let lastUpdate = lastUpdateTime,
-           Date().timeIntervalSince(lastUpdate) < throttleInterval {
-            return
-        }
+  // MARK: - Zoom Gestures
 
-        // Determine primary scroll direction
-        let absX = abs(translation.width)
-        let absY = abs(translation.height)
+  func handleZoomStart() {
+    state = .zooming
+  }
 
-        var verticalDelta: Int8?
-        var horizontalDelta: Int8?
+  func handleZoomChange(scale: CGFloat, completion: @escaping (UInt8) -> Void) {
+    guard state == .zooming else { return }
 
-        if absY > absX {
-            // Vertical scroll is dominant
-            verticalDelta = ProtocolEncoder.deltaToInt8(-translation.height)
-        } else {
-            // Horizontal scroll is dominant
-            horizontalDelta = ProtocolEncoder.deltaToInt8(translation.width)
-        }
+    let zoomValue = ProtocolEncoder.scaleToUInt8(scale)
+    completion(zoomValue)
+  }
 
-        completion(verticalDelta, horizontalDelta)
-        lastUpdateTime = Date()
-    }
-
-    func handleScrollEnd() {
-        state = .idle
-        lastUpdateTime = nil
-    }
-
-    // MARK: - Long Press + Drag (Drag & Drop)
-
-    func handleLongPressStart(completion: @escaping () -> Void) {
-        state = .dragAndDrop
-        completion() // Send mouse down
-    }
-
-    func handleLongPressDrag(translation: CGSize, completion: @escaping (Int8, Int8) -> Void) {
-        guard state == .dragAndDrop else { return }
-
-        // Throttle updates
-        if let lastUpdate = lastUpdateTime,
-           Date().timeIntervalSince(lastUpdate) < throttleInterval {
-            return
-        }
-
-        // Apply acceleration curve and invert axes
-        let acceleratedX = applyAcceleration(-translation.width)
-        let acceleratedY = applyAcceleration(-translation.height)
-
-        let dx = ProtocolEncoder.deltaToInt8(acceleratedX)
-        let dy = ProtocolEncoder.deltaToInt8(acceleratedY)
-
-        completion(dx, dy)
-        lastUpdateTime = Date()
-    }
-
-    func handleLongPressEnd(completion: @escaping () -> Void) {
-        completion() // Send mouse up
-        state = .idle
-        lastUpdateTime = nil
-    }
-
-    // MARK: - Zoom Gestures
-
-    func handleZoomStart() {
-        state = .zooming
-    }
-
-    func handleZoomChange(scale: CGFloat, completion: @escaping (UInt8) -> Void) {
-        guard state == .zooming else { return }
-
-        let zoomValue = ProtocolEncoder.scaleToUInt8(scale)
-        completion(zoomValue)
-    }
-
-    func handleZoomEnd() {
-        state = .idle
-    }
+  func handleZoomEnd() {
+    state = .idle
+  }
 }
