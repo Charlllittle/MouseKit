@@ -11,7 +11,7 @@ import Foundation
 struct ProtocolEncoder {
   /**
    Encodes the handshake message for initial connection.
-
+  
    - Returns: UTF-8 encoded handshake data
    */
   @MainActor
@@ -23,7 +23,7 @@ struct ProtocolEncoder {
   /**
    Encodes an input command into binary protocol format.
    Each command consists of a command code followed by command-specific data.
-
+  
    - Parameter command: The input command to encode
    - Returns: Binary data ready to be sent over the network
    */
@@ -61,7 +61,7 @@ struct ProtocolEncoder {
 
   /**
    Clamps an Int8 value to valid range (-128 to 127).
-
+  
    - Parameter value: The value to clamp
    - Returns: The clamped value
    */
@@ -72,7 +72,7 @@ struct ProtocolEncoder {
   /**
    Converts a CGFloat delta to a clamped Int8 value.
    Used for mouse movement and scroll deltas.
-
+  
    - Parameter value: The floating-point delta value
    - Returns: An Int8 value clamped to -128...127
    */
@@ -84,7 +84,7 @@ struct ProtocolEncoder {
   /**
    Converts a CGFloat scale to UInt8 (0-255).
    Used for zoom/pinch gestures.
-
+  
    - Parameter scale: The scale value (typically 0-2.55)
    - Returns: A UInt8 value from 0 to 255
    */

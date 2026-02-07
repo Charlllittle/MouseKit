@@ -40,7 +40,7 @@ class GestureProcessor: ObservableObject {
   /**
    Handles a single tap gesture with double-tap detection.
    If a second tap occurs within the timeout, triggers a double-tap instead.
-
+  
    - Parameter completion: Closure to execute for each tap (called once for single tap, twice for double-tap)
    */
   func handleSingleTap(completion: @escaping () -> Void) {
@@ -75,7 +75,7 @@ class GestureProcessor: ObservableObject {
   /**
    Handles a two-finger tap gesture (right-click equivalent).
    Executes immediately without double-tap detection.
-
+  
    - Parameter completion: Closure to execute for the right-click action
    */
   func handleTwoFingerTap(completion: @escaping () -> Void) {
@@ -94,7 +94,7 @@ class GestureProcessor: ObservableObject {
 
   /**
    Processes drag movement with acceleration and throttling.
-
+  
    - Parameters:
      - translation: The movement delta since last update
      - completion: Closure receiving the processed dx and dy movement values
@@ -134,7 +134,7 @@ class GestureProcessor: ObservableObject {
   /**
    Applies velocity-based acceleration to mouse movement using a power curve.
    Small movements: ~1.5x, Medium: ~2-3x, Large: ~4x
-
+  
    - Parameter value: The raw movement value
    - Returns: The accelerated movement value
    */
@@ -168,7 +168,7 @@ class GestureProcessor: ObservableObject {
 
   /**
    Processes scroll movement, determining the dominant scroll direction.
-
+  
    - Parameters:
      - translation: The movement delta since last update
      - completion: Closure receiving optional vertical and horizontal scroll deltas
@@ -213,7 +213,7 @@ class GestureProcessor: ObservableObject {
   /**
    Begins a long press gesture (drag and drop).
    Sends an immediate mouse down event.
-
+  
    - Parameter completion: Closure to execute for the mouse down action
    */
   func handleLongPressStart(completion: @escaping () -> Void) {
@@ -223,7 +223,7 @@ class GestureProcessor: ObservableObject {
 
   /**
    Processes long press drag movement with acceleration.
-
+  
    - Parameters:
      - translation: The movement delta since last update
      - completion: Closure receiving the processed dx and dy movement values
@@ -251,7 +251,7 @@ class GestureProcessor: ObservableObject {
 
   /**
    Ends a long press gesture and sends mouse up event.
-
+  
    - Parameter completion: Closure to execute for the mouse up action
    */
   func handleLongPressEnd(completion: @escaping () -> Void) {
@@ -269,7 +269,7 @@ class GestureProcessor: ObservableObject {
 
   /**
    Processes zoom gesture changes.
-
+  
    - Parameters:
      - scale: The pinch gesture scale value
      - completion: Closure receiving the encoded zoom value (0-255)

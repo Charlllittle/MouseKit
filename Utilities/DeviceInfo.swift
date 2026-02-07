@@ -34,7 +34,7 @@ enum DeviceInfo {
   /**
    Generates the handshake string sent to the server during connection.
    Format: "manufacturer/deviceName/model/connectionType"
-
+  
    - Returns: A formatted handshake string
    */
   @MainActor
