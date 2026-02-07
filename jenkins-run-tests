@@ -11,7 +11,7 @@ pipeline {
         FASTLANE_APPLE_ISSUER_ID = credentials('d4d7bb60-9a0e-4fa2-ad5f-9673c74eaa83')
         FASTLANE_APPLE_API_KEY_PATH = credentials('132265d2-1261-41a2-b782-90cab25dd2f4')
         MATCH_PASSWORD = credentials('68dcd5f8-39e6-4d88-b787-c65c26c22df6')
-        DEEPSOURCE_DSN = credentials('aecbb5c0-1d2d-4e16-b94f-b8b5b9ce6f57')
+        DEEPSOURCE_DSN = credentials('deepsource_dsn_mousekit')
     }
     
     stages {
