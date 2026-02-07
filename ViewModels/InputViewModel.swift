@@ -10,20 +10,20 @@ import SwiftUI
 
 @MainActor
 class InputViewModel: ObservableObject {
-    @Published var currentMode: InputMode = .touchpad
-    @Published var isConnected = false
+  @Published var currentMode: InputMode = .touchpad
+  @Published var isConnected = false
 
-    private let connectionManager = ConnectionManager.shared
+  private let connectionManager = ConnectionManager.shared
 
-    func sendCommand(_ command: InputCommand) {
-        Task {
-            await connectionManager.sendCommand(command)
-        }
+  func sendCommand(_ command: InputCommand) {
+    Task {
+      await connectionManager.sendCommand(command)
     }
+  }
 
-    func disconnect() {
-        Task {
-            await connectionManager.disconnect()
-        }
+  func disconnect() {
+    Task {
+      await connectionManager.disconnect()
     }
+  }
 }
