@@ -82,3 +82,9 @@ fastlane/test_output
 iOSInjectionProject/
 
 .DS_Store
+
+fastlane/fastlane.env
+
+cobertura.xml
+
+fastlane/.env

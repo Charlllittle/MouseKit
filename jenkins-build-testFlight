@@ -1,0 +1,63 @@
+pipeline {
+    agent {
+        label 'Mac-mini'
+    }
+    
+    environment {
+        PATH = "/opt/homebrew/bin:/opt/homebrew/opt/ruby/bin:$PATH"
+        LANG = 'en_US.UTF-8'
+        LC_ALL = 'en_US.UTF-8'
+        FASTLANE_APPLE_API_KEY_ID = credentials('fc447627-f4b7-4d37-972e-2cdf2e765e18')
+        FASTLANE_APPLE_ISSUER_ID = credentials('d4d7bb60-9a0e-4fa2-ad5f-9673c74eaa83')
+        FASTLANE_APPLE_API_KEY_PATH = credentials('132265d2-1261-41a2-b782-90cab25dd2f4')
+        MATCH_PASSWORD = credentials('68dcd5f8-39e6-4d88-b787-c65c26c22df6')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [localBranch(), [$class: 'WipeWorkspace']], userRemoteConfigs: [[credentialsId: '21a37f96-9d37-4db5-881d-0d77e18a9827', url: 'git@github.com:Charlllittle/MouseKit.git']])
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Install Ruby using Homebrew if not already installed
+                    sh '''
+                    if ! command -v ruby &> /dev/null; then
+                        echo "Installing Ruby using Homebrew"
+                        brew install ruby
+                    fi
+                    '''
+
+                    // Ensure Bundler is installed
+                    sh 'gem install bundler'
+
+                    // Install project dependencies using Bundler
+                    sh 'bundle install'
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                ansiColor('XTERM') {
+                script {
+                    // Run the xcodebuild command
+                        sh '''
+                            bundle exec fastlane beta
+                        '''
+                        }
+                }
+            }
+        }
+    }
+        
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
+
