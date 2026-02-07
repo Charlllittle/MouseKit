@@ -1,0 +1,236 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https: //docs.fastlane.tools
+  #
+# For a list of all available actions, check out
+#
+# https: //docs.fastlane.tools/actions
+  #
+# For a list of all available plugins, check out
+#
+# https: //docs.fastlane.tools/plugins/available-plugins
+  #
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+    before_all do ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "120" end
+
+      desc "Push a new beta build to TestFlight"
+      lane :beta do
+      api_key = app_store_connect_api_key(
+        key_id: ENV["FASTLANE_APPLE_API_KEY_ID"],
+        issuer_id: ENV["FASTLANE_APPLE_ISSUER_ID"],
+        key_filepath: ENV["FASTLANE_APPLE_API_KEY_PATH"]
+       )
+
+        unlock_keychain(path: "login.keychain", password: ENV["MATCH_PASSWORD"])
+
+        # Get the version number
+        version_number = get_version_number(xcodeproj: "MouseKit.xcodeproj")
+
+        # Increment build number
+        increment_build_number(xcodeproj: "MouseKit.xcodeproj")
+
+        # Setup code signing
+        match(
+          type: "appstore",
+          readonly: is_ci,
+          keychain_password: ENV["MATCH_PASSWORD"]
+        )
+
+        # Build the app
+        build_app(
+          scheme: "MouseKit",
+          clean: true,
+          export_method: "app-store",
+          export_options: {
+            provisioningProfiles: {
+              "com.mousekit.ios" => "match AppStore com.mousekit.ios"
+            },
+            signingStyle: "manual"
+          }
+        )
+
+        # Upload to TestFlight
+        upload_to_testflight(api_key: api_key)
+
+        # Commit the version bump
+        commit_version_bump(xcodeproj: "MouseKit.xcodeproj")
+
+        # Add Git tag with version number
+        add_git_tag(
+          grouping: "TestFlight",
+          includes_lane: true,
+          prefix: "v#{version_number}-", # Prefix includes version number postfix: "",
+          build_number: lane_context[:BUILD_NUMBER] # Use the incremented build number
+        )
+
+        # Push to remote Git repository
+        push_to_git_remote
+    end
+
+    desc "Push a new release build to App Store"
+    lane :release do | options |
+        # Accept parameters with defaults
+        submit_for_review = options.fetch(:submit_for_review, false)
+        automatic_release = options.fetch(:automatic_release, false)
+        skip_metadata = options.fetch(:skip_metadata, true)
+        skip_screenshots = options.fetch(:skip_screenshots, true)
+
+        api_key = app_store_connect_api_key(
+          key_id: ENV["FASTLANE_APPLE_API_KEY_ID"],
+          issuer_id: ENV["FASTLANE_APPLE_ISSUER_ID"],
+          key_filepath: ENV["FASTLANE_APPLE_API_KEY_PATH"]
+        )
+
+        clear_derived_data
+
+        unlock_keychain(path: "login.keychain", password: ENV["MATCH_PASSWORD"])
+
+        # Get the version number
+        version_number = get_version_number(xcodeproj: "MouseKit.xcodeproj")
+
+        # Increment build number
+        increment_build_number(xcodeproj: "MouseKit.xcodeproj")
+
+        # Setup code signing
+        match(
+          type: "appstore",
+          readonly: is_ci,
+          keychain_password: ENV["MATCH_PASSWORD"]
+        )
+
+        # Build the app
+        build_app(
+          scheme: "MouseKit",
+          clean: true,
+          export_method: "app-store",
+          export_options: {
+            provisioningProfiles: {
+              "com.mousekit.ios" => "match AppStore com.mousekit.ios"
+            },
+            signingStyle: "manual"
+          }
+        )
+
+        # Upload to App Store
+        upload_to_app_store(
+          api_key: api_key,
+          automatic_release: automatic_release,
+          submit_for_review: submit_for_review,
+          skip_metadata: skip_metadata,
+          skip_screenshots: skip_screenshots,
+          force: true,
+          precheck_include_in_app_purchases: false
+        )
+
+        # Commit the version bump
+        commit_version_bump(xcodeproj: "MouseKit.xcodeproj")
+
+        # Add Git tag with version number
+        add_git_tag(
+          grouping: "AppStore",
+          includes_lane: true,
+          prefix: "v#{version_number}-", # Prefix includes version number postfix: "",
+          build_number: lane_context[:BUILD_NUMBER] # Use the incremented build number
+        )
+
+        # Push to remote Git repository
+        push_to_git_remote
+    end
+
+    desc "Build the app without uploading"
+    lane :build do
+        unlock_keychain(path: "login.keychain", password: ENV["MATCH_PASSWORD"])
+
+        # Setup code signing
+        match(
+          type: "appstore",
+          readonly: is_ci,
+          keychain_password: ENV["MATCH_PASSWORD"]
+        )
+
+        # Build the app
+        build_app(
+          scheme: "MouseKit",
+          clean: true,
+          export_method: "app-store",
+          export_options: {
+            provisioningProfiles: {
+              "com.mousekit.ios" => "match AppStore com.mousekit.ios"
+            },
+            signingStyle: "manual"
+          }
+        )
+    end
+    
+    desc "Build for testing (all tests)"
+    lane :build_for_test_all do
+        run_tests(
+                  testplan: "MouseKit",
+                  build_for_testing: true,
+                  devices: ["iPhone 17 Pro"],
+                  scheme: "MouseKit"
+                  )
+    end
+    
+    desc "Run all the tests (without building)"
+    lane :test_all_only do
+        run_tests(
+                  testplan: "MouseKit",
+                  test_without_building: true,
+                  code_coverage: true,
+                  xcodebuild_formatter: "xcbeautify",
+                  result_bundle: true,
+                  output_types: "junit",
+                  fail_build: false,
+                  devices: ["iPhone 17 Pro"],
+                  scheme: "MouseKit"
+                  )
+                  slather(
+                          proj: "MouseKit.xcodeproj",
+                          scheme: "MouseKit",
+                          cobertura_xml: true
+                          )
+    end
+    
+    desc "Run all the tests (build + test)"
+    lane :test_all do
+        build_for_test_all
+        test_all_only
+    end
+    
+    desc "Bump patch version (e.g., 1.0.0 -> 1.0.1) and commit"
+    lane :bump_patch do
+        set_version(bump_type: "patch")
+    end
+    
+    desc "Bump minor version (e.g., 1.0.0 -> 1.1.0) and commit"
+    lane :bump_minor do
+        set_version(bump_type: "minor")
+    end
+    
+    desc "Bump major version (e.g., 1.0 -> 2.0) and commit"
+    lane :bump_major do
+        set_version(bump_type: "major")
+    end
+    
+    desc "Bump the version number and commit"
+    lane :set_version do |options|
+        bump_type = options[:bump_type]
+        
+        increment_version_number(bump_type: bump_type, xcodeproj: "MouseKit.xcodeproj")
+        
+        # Reset build number to 1 for new version
+        increment_build_number(build_number: 1, xcodeproj: "MouseKit.xcodeproj")
+        
+        # Commit the version bump
+        commit_version_bump(xcodeproj: "MouseKit.xcodeproj")
+        
+        # Push to remote Git repository
+        push_to_git_remote
+    end
+end

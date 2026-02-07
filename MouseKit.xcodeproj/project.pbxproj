@@ -32,6 +32,12 @@
 		5695F0E22F3676B000737EE3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5695F0FE2F36774600737EE3 /* MouseKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MouseKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5695F11E2F367F1200737EE3 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		5695F1892F37431600737EE3 /* Gemfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Gemfile; sourceTree = "<group>"; };
+		5695F18A2F37431600737EE3 /* Gemfile.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Gemfile.lock; sourceTree = "<group>"; };
+		5695F5942F3752D200737EE3 /* jenkins-run-tests */ = {isa = PBXFileReference; lastKnownFileType = text; path = "jenkins-run-tests"; sourceTree = "<group>"; };
+		5695F5952F3752D200737EE3 /* jenkins-build-AppStore */ = {isa = PBXFileReference; lastKnownFileType = text; path = "jenkins-build-AppStore"; sourceTree = "<group>"; };
+		5695F5962F3752D200737EE3 /* jenkins-build-testFlight */ = {isa = PBXFileReference; lastKnownFileType = text; path = "jenkins-build-testFlight"; sourceTree = "<group>"; };
+		5695F5972F3752D200737EE3 /* jenkins-bump-version */ = {isa = PBXFileReference; lastKnownFileType = text; path = "jenkins-bump-version"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -102,6 +108,7 @@
 		5695F0EE2F3676B000737EE3 /* Utilities */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5695F1172F36781000737EE3 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Utilities; sourceTree = "<group>"; };
 		5695F0F12F3676B000737EE3 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5695F1182F36781000737EE3 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
 		5695F0FB2F3676B000737EE3 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5695F1192F36781000737EE3 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		5695F1882F37431600737EE3 /* fastlane */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {Fastfile = text.script.ruby; }; explicitFolders = (); path = fastlane; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +132,13 @@
 		5000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				5695F5942F3752D200737EE3 /* jenkins-run-tests */,
+				5695F5952F3752D200737EE3 /* jenkins-build-AppStore */,
+				5695F5962F3752D200737EE3 /* jenkins-build-testFlight */,
+				5695F5972F3752D200737EE3 /* jenkins-bump-version */,
+				5695F1882F37431600737EE3 /* fastlane */,
+				5695F1892F37431600737EE3 /* Gemfile */,
+				5695F18A2F37431600737EE3 /* Gemfile.lock */,
 				56001A3E2F36ACD50054EB1B /* MouseKit.xctestplan */,
 				5695F11E2F367F1200737EE3 /* Localizable.xcstrings */,
 				5695F0D72F3676B000737EE3 /* App */,
@@ -276,7 +290,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 7GK97F9XRJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -298,7 +312,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 7GK97F9XRJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -443,10 +457,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 7GK97F9XRJ;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 7GK97F9XRJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -464,6 +480,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mousekit.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development com.mousekit.ios";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -475,10 +493,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 7GK97F9XRJ;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 7GK97F9XRJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -496,6 +516,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mousekit.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.mousekit.ios";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
