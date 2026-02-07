@@ -8,22 +8,32 @@
 import Foundation
 import SwiftUI
 
+/// View model for the input screen, managing input mode and command sending
 @MainActor
 class InputViewModel: ObservableObject {
-    @Published var currentMode: InputMode = .touchpad
-    @Published var isConnected = false
+  /// Current input mode (touchpad, keyboard, or numpad)
+  @Published var currentMode: InputMode = .touchpad
+  /// Connection status indicator
+  @Published var isConnected = false
 
-    private let connectionManager = ConnectionManager.shared
+  /// Reference to the shared connection manager
+  private let connectionManager = ConnectionManager.shared
 
-    func sendCommand(_ command: InputCommand) {
-        Task {
-            await connectionManager.sendCommand(command)
-        }
+  /**
+   Sends an input command to the connected remote desktop.
+  
+   - Parameter command: The input command to send
+   */
+  func sendCommand(_ command: InputCommand) {
+    Task {
+      await connectionManager.sendCommand(command)
     }
+  }
 
-    func disconnect() {
-        Task {
-            await connectionManager.disconnect()
-        }
+  /// Disconnects from the current remote desktop
+  func disconnect() {
+    Task {
+      await connectionManager.disconnect()
     }
+  }
 }
