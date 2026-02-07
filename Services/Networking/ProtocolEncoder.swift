@@ -9,6 +9,7 @@ import Foundation
 
 struct ProtocolEncoder {
     /// Encodes the handshake message
+    @MainActor
     static func encodeHandshake() -> Data {
         let handshake = DeviceInfo.handshakeString()
         return Data(handshake.utf8)

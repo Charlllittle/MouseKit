@@ -403,7 +403,7 @@ struct AllGesturesView: UIViewRepresentable {
             return false
         }
 
-        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBegin gesture: UIGestureRecognizer) -> Bool {
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
             print("DEBUG shouldBegin: \(type(of: gestureRecognizer)) - returning true")
             return true
         }

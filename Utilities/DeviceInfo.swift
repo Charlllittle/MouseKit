@@ -12,10 +12,12 @@ enum DeviceInfo {
         "Apple"
     }
 
+    @MainActor
     static var deviceName: String {
         UIDevice.current.name
     }
 
+    @MainActor
     static var model: String {
         UIDevice.current.model
     }
@@ -24,6 +26,7 @@ enum DeviceInfo {
         1 // WiFi only
     }
 
+    @MainActor
     static func handshakeString() -> String {
         "\(manufacturer)/\(deviceName)/\(model)/\(connectionType)"
     }

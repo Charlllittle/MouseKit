@@ -46,9 +46,12 @@ class GestureProcessor: ObservableObject {
             doubleTapTimer = Timer.scheduledTimer(withTimeInterval: Constants.doubleTapDelay, repeats: false) { [weak self] _ in
                 guard let self = self else { return }
 
-                // No second tap detected, execute single tap
-                self.pendingSingleTap?()
-                self.pendingSingleTap = nil
+                // Execute on main actor since we're accessing main-actor isolated properties
+                Task { @MainActor in
+                    // No second tap detected, execute single tap
+                    self.pendingSingleTap?()
+                    self.pendingSingleTap = nil
+                }
             }
         }
     }
