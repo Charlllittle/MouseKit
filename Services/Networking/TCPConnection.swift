@@ -99,7 +99,7 @@ actor TCPConnection {
   /// - Throws: TCPConnectionError if connection fails or times out
   private func waitForConnection() async throws {
     for _ in 0..<50 {  // 5 seconds timeout (50 * 100ms)
-      guard let connection = connection else {
+      guard let connection else {
         throw TCPConnectionError.notConnected
       }
 
@@ -130,7 +130,7 @@ actor TCPConnection {
   /// - Parameter data: The data to send
   /// - Throws: TCPConnectionError if not connected or send fails
   func send(_ data: Data) async throws {
-    guard let connection = connection else {
+    guard let connection else {
       throw TCPConnectionError.notConnected
     }
 
@@ -142,7 +142,7 @@ actor TCPConnection {
       connection.send(
         content: data,
         completion: .contentProcessed { error in
-          if let error = error {
+          if let error {
             continuation.resume(throwing: TCPConnectionError.sendFailed(error.localizedDescription))
           } else {
             continuation.resume()
@@ -160,7 +160,7 @@ actor TCPConnection {
   /// - Returns: The received data
   /// - Throws: TCPConnectionError if not connected or receive fails
   func receive(minimumLength: Int = 1, maximumLength: Int = 65536) async throws -> Data {
-    guard let connection = connection else {
+    guard let connection else {
       throw TCPConnectionError.notConnected
     }
 
@@ -171,10 +171,10 @@ actor TCPConnection {
     return try await withCheckedThrowingContinuation { continuation in
       connection.receive(minimumIncompleteLength: minimumLength, maximumLength: maximumLength) {
         data, _, isComplete, error in
-        if let error = error {
+        if let error {
           continuation.resume(
             throwing: TCPConnectionError.receiveFailed(error.localizedDescription))
-        } else if let data = data {
+        } else if let data {
           continuation.resume(returning: data)
         } else if isComplete {
           continuation.resume(throwing: TCPConnectionError.receiveFailed("Connection closed"))
