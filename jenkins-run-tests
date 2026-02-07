@@ -1,0 +1,93 @@
+pipeline {
+    agent {
+        label 'Mac-mini'
+    }
+    
+    environment {
+        PATH = "/opt/homebrew/bin:/opt/homebrew/opt/ruby/bin:$PATH"
+        LANG = 'en_US.UTF-8'
+        LC_ALL = 'en_US.UTF-8'
+        FASTLANE_APPLE_API_KEY_ID = credentials('fc447627-f4b7-4d37-972e-2cdf2e765e18')
+        FASTLANE_APPLE_ISSUER_ID = credentials('d4d7bb60-9a0e-4fa2-ad5f-9673c74eaa83')
+        FASTLANE_APPLE_API_KEY_PATH = credentials('132265d2-1261-41a2-b782-90cab25dd2f4')
+        MATCH_PASSWORD = credentials('68dcd5f8-39e6-4d88-b787-c65c26c22df6')
+        DEEPSOURCE_DSN = credentials('aecbb5c0-1d2d-4e16-b94f-b8b5b9ce6f57')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Install Ruby using Homebrew if not already installed
+                    sh '''
+                    if ! command -v ruby &> /dev/null; then
+                        echo "Installing Ruby using Homebrew"
+                        brew install ruby
+                    fi
+                    '''
+                    
+                    sh '''
+                        brew install xcbeautify
+                    '''
+                    
+                    sh 'curl https://deepsource.com/cli | sh'
+
+                    // Ensure Bundler is installed
+                    sh 'gem install bundler'
+
+                    // Install project dependencies using Bundler
+                    sh 'bundle install'
+                }
+            }
+        }
+        
+        stage('Build for Testing') {
+            steps {
+                ansiColor('XTERM') {
+                script {
+                    // Build the app for testing
+                        sh '''
+                            bundle exec fastlane build_for_test_all
+                        '''
+                        }
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                ansiColor('XTERM') {
+                script {
+                    // Run tests using the pre-built app
+                        sh '''
+                            bundle exec fastlane test_all_only
+                        '''
+                        }
+                }
+            }
+        }
+        
+        stage('Publish Test Results') {
+            steps {
+                junit 'fastlane/test_output/report.junit'  // Parse the JUnit report
+                
+                sh '''
+                    ./bin/deepsource report --analyzer test-coverage --key java --value-file cobertura.xml
+                '''
+            }
+        }
+    }
+        
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
+
