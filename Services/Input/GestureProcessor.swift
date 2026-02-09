@@ -217,6 +217,7 @@ class GestureProcessor: ObservableObject {
    */
   func handleLongPressStart(completion: @escaping () -> Void) {
     state = .dragAndDrop
+    lastUpdateTime = Date()
     completion()  // Send mouse down
   }
 
