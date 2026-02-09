@@ -13,54 +13,12 @@ struct KeyboardView: View {
     @State private var previousText = ""
     @State private var isFocused: Bool = false
 
-    // Modifier key states
-    @State private var ctrlPressed = false
-    @State private var altPressed = false
-    @State private var shiftPressed = false
-
 
     var body: some View {
         VStack(spacing: 16) {
-            // Modifier keys section
-            VStack(spacing: 12) {
-                Text("Modifier Keys")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-
-                HStack(spacing: 12) {
-                    ModifierKeyButton(title: "Ctrl", isPressed: $ctrlPressed) {
-                        viewModel.sendCommand(.specialKey(keyCode: 0x11)) // VK_CONTROL
-                    }
-
-                    ModifierKeyButton(title: "Alt", isPressed: $altPressed) {
-                        viewModel.sendCommand(.specialKey(keyCode: 0x12)) // VK_MENU
-                    }
-
-                    ModifierKeyButton(title: "Shift", isPressed: $shiftPressed) {
-                        viewModel.sendCommand(.specialKey(keyCode: 0x10)) // VK_SHIFT
-                    }
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 20)
-
-            // Special keys section
-            VStack(spacing: 12) {
-                Text("Special Keys")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-
-                HStack(spacing: 12) {
-                    SpecialKeyButton(title: "Esc", keyCode: 0x1B, viewModel: viewModel)
-
-                    SpecialKeyButton(title: "Tab", keyCode: 0x09, viewModel: viewModel)
-
-                    SpecialKeyButton(title: "Win", keyCode: 0x5B, viewModel: viewModel)
-
-                    SpecialKeyButton(title: "Delete", keyCode: 0x2E, viewModel: viewModel)
-                }
-            }
-            .padding(.horizontal)
+            // Note: Modifier keys and special function keys are not supported by the current server protocol.
+            // The server only handles ASCII characters via the KEYPRESS command (0x07).
+            // To add support for these keys, the server would need to implement the specialKey command (0x0A).
 
             Spacer()
 
@@ -148,52 +106,6 @@ struct KeyboardView: View {
     private func sendBackspace() {
         // Server expects DEL character (127) for backspace, not BS (0x08)
         viewModel.sendCommand(.keyPress(char: 127))
-    }
-}
-
-// MARK: - Modifier Key Button
-
-struct ModifierKeyButton: View {
-    let title: String
-    @Binding var isPressed: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button {
-            isPressed.toggle()
-            action()
-        } label: {
-            Text(title)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(isPressed ? .white : .primary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(isPressed ? Color.blue : Color(uiColor: .secondarySystemBackground))
-                .cornerRadius(10)
-        }
-    }
-}
-
-// MARK: - Special Key Button
-
-struct SpecialKeyButton: View {
-    let title: String
-    let keyCode: UInt8
-    let viewModel: InputViewModel
-
-    var body: some View {
-        Button {
-            print("DEBUG SpecialKeyButton: Sending \(title) with keyCode: 0x\(String(format: "%02X", keyCode))")
-            viewModel.sendCommand(.specialKey(keyCode: keyCode))
-        } label: {
-            Text(title)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(Color(uiColor: .secondarySystemBackground))
-                .cornerRadius(8)
-        }
     }
 }
 
