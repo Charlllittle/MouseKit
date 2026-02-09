@@ -212,11 +212,12 @@ class GestureProcessor: ObservableObject {
   /**
    Begins a long press gesture (drag and drop).
    Sends an immediate mouse down event.
-  
+
    - Parameter completion: Closure to execute for the mouse down action
    */
   func handleLongPressStart(completion: @escaping () -> Void) {
     state = .dragAndDrop
+    lastUpdateTime = Date()
     completion()  // Send mouse down
   }
 
