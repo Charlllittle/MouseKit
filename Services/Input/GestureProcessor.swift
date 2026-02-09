@@ -51,8 +51,8 @@ class GestureProcessor: ObservableObject {
       pendingSingleTap = nil
 
       // Execute double-tap (two left clicks)
-      pending()      // Call the first tap's closure
-      completion()   // Call the second tap's closure
+      pending()  // Call the first tap's closure
+      completion()  // Call the second tap's closure
     } else {
       // Wait to see if this becomes a double-tap
       pendingSingleTap = completion
