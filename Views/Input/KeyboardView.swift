@@ -44,6 +44,10 @@ struct KeyboardView: View {
                 onTextChange: { oldValue, newValue in
                     handleTextChange(oldValue: oldValue, newValue: newValue)
                 },
+                onBackspace: {
+                    // Always send backspace to remote, even if local field is empty
+                    sendBackspace()
+                },
                 onReturn: {
                     // Send Enter key (newline character) without dismissing keyboard
                     viewModel.sendCommand(.keyPress(char: 0x0A))
@@ -76,7 +80,7 @@ struct KeyboardView: View {
     private func handleTextChange(oldValue: String, newValue: String) {
         print("DEBUG handleTextChange: oldValue='\(oldValue)', newValue='\(newValue)'")
 
-        // Detect what changed
+        // Only handle character additions here; backspace is handled separately
         if newValue.count > oldValue.count {
             // Character(s) added
             let startIndex = oldValue.count
@@ -86,10 +90,6 @@ struct KeyboardView: View {
                 print("DEBUG: Sending character '\(char)'")
                 sendCharacter(char)
             }
-        } else if newValue.count < oldValue.count {
-            // Character deleted (backspace)
-            print("DEBUG: Sending backspace")
-            sendBackspace()
         }
 
         previousText = newValue
@@ -115,15 +115,19 @@ struct CustomKeyboardTextField: UIViewRepresentable {
     @Binding var text: String
     @Binding var isFocused: Bool
     var onTextChange: (String, String) -> Void
+    var onBackspace: () -> Void
     var onReturn: () -> Void
 
-    func makeUIView(context: Context) -> UITextField {
-        let textField = UITextField()
+    func makeUIView(context: Context) -> BackspaceDetectingTextField {
+        let textField = BackspaceDetectingTextField()
         textField.delegate = context.coordinator
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
         textField.returnKeyType = .default
         textField.enablesReturnKeyAutomatically = false
+
+        // Set the backspace handler
+        textField.onBackspace = context.coordinator.handleBackspace
 
         // Make it invisible
         textField.textColor = .clear
@@ -133,8 +137,11 @@ struct CustomKeyboardTextField: UIViewRepresentable {
         return textField
     }
 
-    func updateUIView(_ uiView: UITextField, context: Context) {
+    func updateUIView(_ uiView: BackspaceDetectingTextField, context: Context) {
         uiView.text = text
+
+        // Update the backspace handler in case it changed
+        uiView.onBackspace = context.coordinator.handleBackspace
 
         // Handle focus changes
         if isFocused && !uiView.isFirstResponder {
@@ -145,22 +152,29 @@ struct CustomKeyboardTextField: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text, isFocused: $isFocused, onTextChange: onTextChange, onReturn: onReturn)
+        Coordinator(text: $text, isFocused: $isFocused, onTextChange: onTextChange, onBackspace: onBackspace, onReturn: onReturn)
     }
 
     class Coordinator: NSObject, UITextFieldDelegate {
         @Binding var text: String
         @Binding var isFocused: Bool
         var onTextChange: (String, String) -> Void
+        var onBackspace: () -> Void
         var onReturn: () -> Void
 
         private var previousText: String = ""
 
-        init(text: Binding<String>, isFocused: Binding<Bool>, onTextChange: @escaping (String, String) -> Void, onReturn: @escaping () -> Void) {
+        init(text: Binding<String>, isFocused: Binding<Bool>, onTextChange: @escaping (String, String) -> Void, onBackspace: @escaping () -> Void, onReturn: @escaping () -> Void) {
             self._text = text
             self._isFocused = isFocused
             self.onTextChange = onTextChange
+            self.onBackspace = onBackspace
             self.onReturn = onReturn
+        }
+
+        func handleBackspace() {
+            // Always call the backspace handler, regardless of text field state
+            onBackspace()
         }
 
         func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -175,8 +189,11 @@ struct CustomKeyboardTextField: UIViewRepresentable {
             // Update binding
             text = newValue
 
-            // Call change handler
-            onTextChange(oldValue, newValue)
+            // Call change handler for text that was added
+            // (backspace is handled by BackspaceDetectingTextField.deleteBackward)
+            if !string.isEmpty {
+                onTextChange(oldValue, newValue)
+            }
 
             return true
         }
@@ -201,5 +218,20 @@ struct CustomKeyboardTextField: UIViewRepresentable {
             // Only update if we explicitly want to unfocus
             // This prevents accidental dismissals
         }
+    }
+}
+
+// MARK: - Backspace Detecting TextField
+
+/// Custom UITextField that detects backspace even when the field is empty
+class BackspaceDetectingTextField: UITextField {
+    var onBackspace: (() -> Void)?
+
+    override func deleteBackward() {
+        // Call our custom handler first
+        onBackspace?()
+
+        // Then perform the default deletion
+        super.deleteBackward()
     }
 }
