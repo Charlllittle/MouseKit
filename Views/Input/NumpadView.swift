@@ -73,8 +73,11 @@ struct NumpadView: View {
         case .enter:
             ascii = 0x0A // Newline
         case .backspace:
-            ascii = 0x08 // Backspace
+            ascii = 127 // Backspace (DEL character - matches keyboard implementation)
         case .clear:
+            // TODO: Clear/Escape not supported by server protocol
+            // The server's KEYMAP doesn't include Escape (0x1B)
+            // For now, sending it anyway but it won't do anything
             ascii = 0x1B // Escape
         case .empty:
             return
