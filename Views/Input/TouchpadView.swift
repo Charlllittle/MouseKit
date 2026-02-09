@@ -176,6 +176,7 @@ struct AllGesturesView: UIViewRepresentable {
     let longPress = UILongPressGestureRecognizer(
       target: context.coordinator, action: #selector(Coordinator.handleLongPress))
     longPress.minimumPressDuration = 0.5
+    longPress.allowableMovement = .greatestFiniteMagnitude  // Allow movement during press
     longPress.delegate = context.coordinator
     view.addGestureRecognizer(longPress)
 
@@ -237,8 +238,10 @@ struct AllGesturesView: UIViewRepresentable {
 
     var isLongPressing = false
     var isPanning = false
+    var isDoubleTapDragging = false
     var longPressStartLocation: CGPoint = .zero
     var longPressLastLocation: CGPoint = .zero
+    var lastTapTime: Date?
 
     // Store gesture references
     weak var singlePan: UIPanGestureRecognizer?
@@ -280,6 +283,7 @@ struct AllGesturesView: UIViewRepresentable {
 
     @objc func handleSingleTap(_ gesture: UITapGestureRecognizer) {
       if gesture.state == .ended {
+        lastTapTime = Date()
         onSingleTap()
       }
     }
@@ -308,30 +312,64 @@ struct AllGesturesView: UIViewRepresentable {
 
       switch gesture.state {
       case .began:
-        isPanning = true
-        // Cancel the tap gesture since we're panning
-        singleTap?.isEnabled = false
-        singleTap?.isEnabled = true
-        onDragStart()
-        print("DEBUG handleSinglePan: BEGAN - touches: \(touchCount)")
+        // Check if this pan started within double-tap window
+        if let lastTap = lastTapTime,
+          Date().timeIntervalSince(lastTap) < Constants.doubleTapDelay
+        {
+          // This is a double-tap-and-drag gesture
+          isDoubleTapDragging = true
+          lastTapTime = nil  // Clear to prevent reuse
+          // Cancel the tap gesture since we're doing double-tap drag
+          singleTap?.isEnabled = false
+          singleTap?.isEnabled = true
+          onLongPressStart()  // Send mouseDown
+          print("DEBUG handleSinglePan: BEGAN - DOUBLE TAP DRAG - touches: \(touchCount)")
+        } else {
+          // Regular pan for cursor movement
+          isPanning = true
+          lastTapTime = nil  // Clear to prevent reuse
+          // Cancel the tap gesture since we're panning
+          singleTap?.isEnabled = false
+          singleTap?.isEnabled = true
+          onDragStart()
+          print("DEBUG handleSinglePan: BEGAN - touches: \(touchCount)")
+        }
 
       case .changed:
         let translation = gesture.translation(in: gesture.view)
         print(
           "DEBUG handleSinglePan: CHANGED - translation: \(translation), touches: \(touchCount)")
-        onDragChange(CGSize(width: translation.x, height: translation.y))
+
+        if isDoubleTapDragging {
+          // Send mouseMove for double-tap drag
+          onLongPressDrag(CGSize(width: translation.x, height: translation.y))
+        } else {
+          // Send mouseMove for regular cursor movement
+          onDragChange(CGSize(width: translation.x, height: translation.y))
+        }
         // Reset translation so next update gives us the delta
         gesture.setTranslation(.zero, in: gesture.view)
 
       case .ended, .cancelled:
-        isPanning = false
-        onDragEnd()
-        print(
-          "DEBUG handleSinglePan: ENDED/CANCELLED - state: \(gesture.state.rawValue), touches: \(touchCount)"
-        )
+        if isDoubleTapDragging {
+          isDoubleTapDragging = false
+          onLongPressEnd()  // Send mouseUp
+          print("DEBUG handleSinglePan: ENDED - DOUBLE TAP DRAG - touches: \(touchCount)")
+        } else {
+          isPanning = false
+          onDragEnd()
+          print(
+            "DEBUG handleSinglePan: ENDED/CANCELLED - state: \(gesture.state.rawValue), touches: \(touchCount)"
+          )
+        }
 
       case .failed:
-        isPanning = false
+        if isDoubleTapDragging {
+          isDoubleTapDragging = false
+          onLongPressEnd()  // Send mouseUp
+        } else {
+          isPanning = false
+        }
         print("DEBUG handleSinglePan: FAILED - touches: \(touchCount)")
 
       default:
@@ -362,6 +400,11 @@ struct AllGesturesView: UIViewRepresentable {
     @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
       switch gesture.state {
       case .began:
+        // Don't activate long press if we're in a double-tap drag
+        if isDoubleTapDragging {
+          return
+        }
+
         // Cancel the pan gesture if it started
         if isPanning {
           singlePan?.isEnabled = false
@@ -370,11 +413,17 @@ struct AllGesturesView: UIViewRepresentable {
         }
 
         isLongPressing = true
+        lastTapTime = nil  // Clear to prevent confusion
         longPressStartLocation = gesture.location(in: gesture.view)
         longPressLastLocation = longPressStartLocation
         onLongPressStart()
 
       case .changed:
+        // Don't process if we're in double-tap drag mode
+        if isDoubleTapDragging {
+          return
+        }
+
         let currentLocation = gesture.location(in: gesture.view)
         // Calculate delta from last update, not from start
         let delta = CGSize(
@@ -385,6 +434,11 @@ struct AllGesturesView: UIViewRepresentable {
         longPressLastLocation = currentLocation
 
       case .ended, .cancelled:
+        // Don't process if we're in double-tap drag mode
+        if isDoubleTapDragging {
+          return
+        }
+
         isLongPressing = false
         onLongPressEnd()
 

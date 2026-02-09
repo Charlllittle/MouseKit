@@ -45,14 +45,14 @@ class GestureProcessor: ObservableObject {
    */
   func handleSingleTap(completion: @escaping () -> Void) {
     // Check if we're waiting for a possible double-tap
-    if pendingSingleTap != nil {
+    if let pending = pendingSingleTap {
       // This is a double-tap, cancel pending single tap
       doubleTapTimer?.invalidate()
       pendingSingleTap = nil
 
       // Execute double-tap (two left clicks)
-      completion()
-      completion()
+      pending()  // Call the first tap's closure
+      completion()  // Call the second tap's closure
     } else {
       // Wait to see if this becomes a double-tap
       pendingSingleTap = completion
@@ -217,6 +217,7 @@ class GestureProcessor: ObservableObject {
    */
   func handleLongPressStart(completion: @escaping () -> Void) {
     state = .dragAndDrop
+    lastUpdateTime = Date()
     completion()  // Send mouse down
   }
 
