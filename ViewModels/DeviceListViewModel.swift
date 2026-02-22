@@ -26,6 +26,15 @@ class DeviceListViewModel: ObservableObject {
     storage.devices
   }
 
+  /// UUID of the designated default device, if any
+  var defaultDeviceId: UUID? { storage.defaultDeviceId }
+  /// Whether auto-connect on launch is enabled
+  var autoConnectEnabled: Bool { storage.autoConnectEnabled }
+  /// The designated default device, if any
+  var defaultDevice: SavedDevice? {
+    devices.first { $0.id == storage.defaultDeviceId }
+  }
+
   /**
    Adds a new device to the saved devices list.
    Validates the IP address format before saving.
@@ -34,7 +43,7 @@ class DeviceListViewModel: ObservableObject {
      - name: Display name for the device
      - ipAddress: IP address in dotted decimal format
    */
-  func addDevice(name: String, ipAddress: String) {
+  func addDevice(name: String, ipAddress: String, setAsDefault: Bool = false) {
     guard DeviceStorage.isValidIPAddress(ipAddress) else {
       errorMessage = "Invalid IP address format"
       showingConnectionError = true
@@ -43,7 +52,11 @@ class DeviceListViewModel: ObservableObject {
 
     let device = SavedDevice(name: name, ipAddress: ipAddress)
     storage.saveDevice(device)
+    if setAsDefault {
+      storage.setDefaultDevice(device)
+    }
     showingAddDevice = false
+    objectWillChange.send()
   }
 
   /**
@@ -53,6 +66,7 @@ class DeviceListViewModel: ObservableObject {
    */
   func deleteDevice(_ device: SavedDevice) {
     storage.deleteDevice(device)
+    objectWillChange.send()
   }
 
   /**
@@ -62,6 +76,85 @@ class DeviceListViewModel: ObservableObject {
    */
   func deleteDevices(at indexSet: IndexSet) {
     storage.deleteDevice(at: indexSet)
+    objectWillChange.send()
+  }
+
+  /**
+   Sets a device as the default device.
+  
+   - Parameter device: The device to set as default
+   */
+  func setDefaultDevice(_ device: SavedDevice) {
+    withAnimation {
+      storage.setDefaultDevice(device)
+      objectWillChange.send()
+    }
+  }
+
+  /// Clears the current default device.
+  func removeDefaultDevice() {
+    withAnimation {
+      storage.setDefaultDevice(nil)
+      objectWillChange.send()
+    }
+  }
+
+  /**
+   Enables or disables auto-connect on launch.
+  
+   - Parameter enabled: Whether auto-connect should be enabled
+   */
+  func setAutoConnect(_ enabled: Bool) {
+    storage.setAutoConnect(enabled)
+  }
+
+  /**
+   Retrieves the current default device, if one is set.
+  
+   - Returns: The default device, or nil if no default is set
+   */
+  func getDefaultDevice() -> SavedDevice? {
+    guard let defaultId = storage.defaultDeviceId else { return nil }
+    return devices.first { $0.id == defaultId }
+  }
+
+  /**
+   Retrieves the list of non-default devices.
+  
+   - Returns: An array of devices that are not set as the default
+   */
+  func getnonDefaultDevices() -> [SavedDevice] {
+    guard let defaultId = storage.defaultDeviceId else { return devices }
+    return devices.filter { $0.id != defaultId }
+  }
+
+  /**
+   Checks if there are any non-default devices in the saved devices list.
+  
+   - Returns: True if there are non-default devices, false otherwise
+   */
+  func doNonDefaultDevicesExist() -> Bool {
+    guard let defaultId = storage.defaultDeviceId else { return !devices.isEmpty }
+    return devices.contains { $0.id != defaultId }
+  }
+
+  /**
+   Deletes non-default devices at the specified indices.
+   This method maps indices from the non-default devices array to the full devices array.
+  
+   - Parameter indexSet: Set of indices from the non-default devices array
+   */
+  func deleteNonDefaultDevices(at indexSet: IndexSet) {
+    let nonDefaultDevices = getnonDefaultDevices()
+
+    // Map the indices from nonDefaultDevices to the full devices array
+    let devicesToDelete = indexSet.map { nonDefaultDevices[$0] }
+    let actualIndices = IndexSet(
+      devicesToDelete.compactMap { deviceToDelete in
+        devices.firstIndex(where: { $0.id == deviceToDelete.id })
+      })
+
+    deleteDevices(at: actualIndices)
   }
 
   /**
