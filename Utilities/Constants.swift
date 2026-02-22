@@ -26,5 +26,9 @@ enum Constants {
   enum UserDefaultsKeys {
     /// Key for storing saved device list
     static let savedDevices = "savedDevices"
+    /// Key for storing the default device UUID string
+    static let defaultDeviceId = "defaultDeviceId"
+    /// Key for storing whether auto-connect is enabled
+    static let autoConnectEnabled = "autoConnectEnabled"
   }
 }
