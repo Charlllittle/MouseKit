@@ -35,10 +35,10 @@ struct ConnectingIndicatorView: View {
 
 #Preview("Light Mode") {
   ConnectingIndicatorView()
-        .preferredColorScheme(.light)
+    .preferredColorScheme(.light)
 }
 
 #Preview("Dark Mode") {
-    ConnectingIndicatorView()
-        .preferredColorScheme(.dark)
+  ConnectingIndicatorView()
+    .preferredColorScheme(.dark)
 }
