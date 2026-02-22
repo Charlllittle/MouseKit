@@ -11,6 +11,7 @@ struct MainView: View {
     @StateObject private var viewModel = DeviceListViewModel()
     @StateObject private var connectionManager = ConnectionManager.shared
     @State private var showingInputView = false
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationStack {
@@ -22,11 +23,21 @@ struct MainView: View {
                         description: Text("Add a device to get started")
                     )
                 } else {
-                    DeviceListView(viewModel: viewModel, showingInputView: $showingInputView)
+                    DeviceListView(
+                        viewModel: viewModel,
+                        showingInputView: $showingInputView
+                    )
                 }
             }
             .navigationTitle("MouseKit")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gear")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         viewModel.showingAddDevice = true
@@ -38,10 +49,22 @@ struct MainView: View {
             .sheet(isPresented: $viewModel.showingAddDevice) {
                 AddDeviceView(viewModel: viewModel)
             }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView(viewModel: viewModel)
+            }
+            .onAppear {
+                guard viewModel.autoConnectEnabled,
+                    let device = viewModel.defaultDevice
+                else { return }
+                Task { await viewModel.connectToDevice(device) }
+            }
             .fullScreenCover(isPresented: $showingInputView) {
                 InputContainerView(isPresented: $showingInputView)
             }
-            .alert("Connection Error", isPresented: $viewModel.showingConnectionError) {
+            .alert(
+                "Connection Error",
+                isPresented: $viewModel.showingConnectionError
+            ) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage)
@@ -63,29 +86,6 @@ struct MainView: View {
     }
 }
 
-// MARK: - Connecting Indicator View
-
-struct ConnectingIndicatorView: View {
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-
-            VStack(spacing: 16) {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.5)
-
-                Text("Connecting...")
-                    .font(.headline)
-                    .foregroundColor(.white)
-            }
-            .padding(32)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(UIColor.systemBackground))
-                    .shadow(radius: 10)
-            )
-        }
-    }
+#Preview {
+    MainView()
 }

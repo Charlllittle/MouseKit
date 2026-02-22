@@ -88,6 +88,8 @@
 		5695F1192F36781000737EE3 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Components/ConnectingIndicatorView.swift,
+				Components/DeviceRow.swift,
 				Input/InputContainerView.swift,
 				Input/KeyboardView.swift,
 				Input/NumpadView.swift,
@@ -95,6 +97,7 @@
 				Main/AddDeviceView.swift,
 				Main/DeviceListView.swift,
 				Main/MainView.swift,
+				Main/SettingsView.swift,
 			);
 			target = 6000000000000001 /* MouseKit */;
 		};

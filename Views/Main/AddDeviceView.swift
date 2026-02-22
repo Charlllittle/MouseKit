@@ -13,6 +13,7 @@ struct AddDeviceView: View {
 
     @State private var deviceName = ""
     @State private var ipAddress = ""
+    @State private var setAsDefault = false
 
     var body: some View {
         NavigationStack {
@@ -27,7 +28,21 @@ struct AddDeviceView: View {
                 } header: {
                     Text("Device Information")
                 } footer: {
-                    Text("Enter the IP address of your Mousedroid server (e.g., 192.168.1.100)")
+                    Text(
+                        "Enter the IP address of your Mousedroid server (e.g., 192.168.1.100)"
+                    )
+                }
+
+                Section {
+                    // Set default device
+                    Toggle(
+                        "Set as Default Device",
+                        isOn: $setAsDefault
+                    )
+                } footer: {
+                    Text(
+                        "If enabled, this device will be the default for auto-connection."
+                    )
                 }
             }
             .navigationTitle("Add Device")
@@ -41,7 +56,11 @@ struct AddDeviceView: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        viewModel.addDevice(name: deviceName, ipAddress: ipAddress)
+                        viewModel.addDevice(
+                            name: deviceName,
+                            ipAddress: ipAddress,
+                            setAsDefault: setAsDefault
+                        )
                         if !viewModel.showingConnectionError {
                             dismiss()
                         }
@@ -51,4 +70,8 @@ struct AddDeviceView: View {
             }
         }
     }
+}
+
+#Preview {
+    AddDeviceView(viewModel: DeviceListViewModel())
 }
