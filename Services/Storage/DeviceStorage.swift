@@ -21,7 +21,7 @@ class DeviceStorage: ObservableObject {
 
   /**
    Creates a new device storage manager.
-
+  
    - Parameter userDefaults: UserDefaults instance (defaults to .standard)
    */
   init(userDefaults: UserDefaults = .standard) {
@@ -29,7 +29,8 @@ class DeviceStorage: ObservableObject {
     loadDevices()
     autoConnectEnabled = userDefaults.bool(forKey: Constants.UserDefaultsKeys.autoConnectEnabled)
     if let idString = userDefaults.string(forKey: Constants.UserDefaultsKeys.defaultDeviceId),
-       let id = UUID(uuidString: idString) {
+      let id = UUID(uuidString: idString)
+    {
       defaultDeviceId = id
     }
   }
@@ -58,7 +59,7 @@ class DeviceStorage: ObservableObject {
   /**
    Removes a specific device from the saved devices list.
    Clears the default device if the deleted device was the default.
-
+  
    - Parameter device: The device to delete
    */
   func deleteDevice(_ device: SavedDevice) {
@@ -72,7 +73,7 @@ class DeviceStorage: ObservableObject {
   /**
    Removes devices at the specified indices.
    Clears the default device if the deleted device was the default.
-
+  
    - Parameter indexSet: Set of indices to delete
    */
   func deleteDevice(at indexSet: IndexSet) {
@@ -86,7 +87,7 @@ class DeviceStorage: ObservableObject {
 
   /**
    Sets or clears the default device.
-
+  
    - Parameter device: The device to mark as default, or nil to clear
    */
   func setDefaultDevice(_ device: SavedDevice?) {
@@ -101,7 +102,7 @@ class DeviceStorage: ObservableObject {
 
   /**
    Enables or disables auto-connect on launch.
-
+  
    - Parameter enabled: Whether auto-connect should be enabled
    */
   func setAutoConnect(_ enabled: Bool) {
@@ -131,7 +132,7 @@ class DeviceStorage: ObservableObject {
     return parts.allSatisfy { part in
       // Empty parts indicate leading, trailing, or consecutive dots
       guard !part.isEmpty else { return false }
-      
+
       guard let number = Int(part), number >= 0, number <= 255 else {
         return false
       }

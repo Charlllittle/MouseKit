@@ -9,30 +9,30 @@ import SwiftUI
 
 ///Connecting Indicator View
 struct ConnectingIndicatorView: View {
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
+  var body: some View {
+    ZStack {
+      Color.black.opacity(0.4)
+        .ignoresSafeArea()
 
-            VStack(spacing: 16) {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.5)
+      VStack(spacing: 16) {
+        ProgressView()
+          .progressViewStyle(CircularProgressViewStyle(tint: .white))
+          .scaleEffect(1.5)
 
-                Text("Connecting...")
-                    .font(.headline)
-                    .foregroundColor(.white)
-            }
-            .padding(32)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(UIColor.systemBackground))
-                    .shadow(radius: 10)
-            )
-        }
+        Text("Connecting...")
+          .font(.headline)
+          .foregroundColor(.white)
+      }
+      .padding(32)
+      .background(
+        RoundedRectangle(cornerRadius: 16)
+          .fill(Color(UIColor.systemBackground))
+          .shadow(radius: 10)
+      )
     }
+  }
 }
 
 #Preview {
-    ConnectingIndicatorView()
+  ConnectingIndicatorView()
 }
