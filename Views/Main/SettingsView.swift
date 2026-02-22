@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// Settings View for managing app preferences
 struct SettingsView: View {
   @ObservedObject var viewModel: DeviceListViewModel
   @Environment(\.dismiss) private var dismiss

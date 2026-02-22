@@ -44,7 +44,7 @@ struct DeviceRow: View {
     }
     .buttonStyle(.plain)
     .contextMenu {
-      if let onRemoveDefault = onRemoveDefault {
+      if let onRemoveDefault {
         Button(role: .destructive) {
           onRemoveDefault()
         } label: {
@@ -52,7 +52,7 @@ struct DeviceRow: View {
         }
       }
 
-      if let onSetDefault = onSetDefault {
+      if let onSetDefault {
         Button {
           onSetDefault()
         } label: {
