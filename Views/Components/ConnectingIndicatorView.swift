@@ -16,12 +16,12 @@ struct ConnectingIndicatorView: View {
 
       VStack(spacing: 16) {
         ProgressView()
-          .progressViewStyle(CircularProgressViewStyle(tint: .white))
+          .progressViewStyle(CircularProgressViewStyle(tint: .primary))
           .scaleEffect(1.5)
 
         Text("Connecting...")
           .font(.headline)
-          .foregroundColor(.white)
+          .foregroundColor(.primary)
       }
       .padding(32)
       .background(
@@ -33,6 +33,12 @@ struct ConnectingIndicatorView: View {
   }
 }
 
-#Preview {
+#Preview("Light Mode") {
   ConnectingIndicatorView()
+    .preferredColorScheme(.light)
+}
+
+#Preview("Dark Mode") {
+  ConnectingIndicatorView()
+    .preferredColorScheme(.dark)
 }
