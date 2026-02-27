@@ -405,11 +405,10 @@ struct AllGesturesView: UIViewRepresentable {
           return
         }
 
-        // Cancel the pan gesture if it started
+        // Don't activate long press if the user was already panning (moving the cursor).
+        // This prevents a mouse-down being sent when the user drags and then holds still.
         if isPanning {
-          singlePan?.isEnabled = false
-          singlePan?.isEnabled = true
-          isPanning = false
+          return
         }
 
         isLongPressing = true
