@@ -1,1 +1,16 @@
+MouseKit – Remote Mouse & Keyboard
+Transform your iPhone or iPad into a powerful wireless trackpad and keyboard for your Windows PC.
+MouseKit is the ultimate iOS companion for MouseDroid, giving you seamless control over your computer from anywhere in the room. Whether you're presenting, gaming, or just relaxing on the sofa, MouseKit puts your cursor right at your fingertips.
+Features
 
+Smooth trackpad control with multi-touch gesture support
+Full wireless keyboard input — type directly from your device
+Fast, low-latency connection over your local Wi-Fi network
+Clean, intuitive interface designed for iPhone and iPad
+Free and open-source — no hidden fees or subscriptions
+
+How It Works
+Install the MouseDroid server on your Windows PC, connect both devices to the same Wi-Fi network, and you're ready to go. No cables, no complicated setup — just instant wireless control.
+Perfect For
+Home theatre PC users, presenters, sim racers, coders, and anyone who wants a convenient way to control their Windows machine from their iOS device.
+Download MouseKit today and cut the cord for good.
