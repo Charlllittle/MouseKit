@@ -1,1 +1,1 @@
-
+trackpad,wireless,remote,pc,desktop,controller,keyboard,mouse,windows,cursor
